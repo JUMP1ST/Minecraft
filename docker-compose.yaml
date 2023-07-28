@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+
+  app:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: npm start
