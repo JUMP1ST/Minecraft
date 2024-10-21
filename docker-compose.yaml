@@ -1,14 +1,20 @@
-version: '3'
+version: '3.8'  # Use the latest compatible version
 
 services:
   web:
-    image: nginx:latest
+    image: nginx:stable-alpine  # Lighter image for better performance
     ports:
       - "80:80"
+    restart: unless-stopped  # Ensures the container restarts automatically on failure
+    depends_on:
+      - app  # Ensures the app service starts before web
 
   app:
-    image: node:latest
+    image: node:18-alpine  # Use a smaller and secure Alpine-based image
     working_dir: /app
     volumes:
-      - ./app:/app
-    command: npm start
+      - ./app:/app:cached  # Improves performance by caching the volume
+    command: ["npm", "start"]
+    environment:
+      NODE_ENV: production  # Optimizes Node.js for production
+    restart: unless-stopped  # Auto-restart on failure
