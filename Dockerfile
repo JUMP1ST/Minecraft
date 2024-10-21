@@ -1,21 +1,21 @@
-# Use a smaller and more secure OpenJDK base image
-FROM eclipse-temurin:8-jre-alpine
+FROM eclipse-temurin:17-jre-alpine  # Use Java 17 for Minecraft 1.17+ compatibility
 
-# Set a consistent working directory
 WORKDIR /minecraft_server
 
-# Use COPY instead of ADD for better clarity and control
+# Download PaperMC server jar
+RUN wget -q https://papermc.io/api/v2/projects/paper/versions/1.17.1/builds/138/downloads/paper-1.17.1-138.jar -O paper.jar && \
+    chmod +x paper.jar
+
+# Copy configuration files like server.properties
 COPY server.properties /minecraft_server/
 
-# Download the CraftBukkit jar during build to cache it, avoiding redownloads on every build
-RUN wget -q https://cdn.getbukkit.org/craftbukkit/craftbukkit-1.17.1.jar -O craftbukkit.jar && \
-    chmod +x craftbukkit.jar
-
-# Expose only the required port
+# Expose the Minecraft server port
 EXPOSE 25565/tcp
 
-# Use ENTRYPOINT for better control and to allow overriding CMD
-ENTRYPOINT ["java", "-Xmx1024M", "-Xms1024M", "-jar", "/minecraft_server/craftbukkit.jar"]
+# Increase memory for resource packs and performance
+ENTRYPOINT ["java", "-Xmx4096M", "-Xms2048M", "-XX:+UnlockExperimentalVMOptions", \
+            "-XX:+UseG1GC", "-jar", "/minecraft_server/paper.jar"]
 
-# Set default CMD to start the server
+# Run the server without a GUI
 CMD ["nogui"]
+
